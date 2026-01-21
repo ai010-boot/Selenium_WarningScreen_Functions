@@ -138,7 +138,7 @@ pytest -n 4  # 4个进程并行
 - Python 3.x
 
 ## 作者
-自动化测试团队
+shizhuo
 
 ## 许可证
-MIT License
+无
