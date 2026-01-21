@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test Reports
+reports/html/*.html
+reports/screenshots/*.png
+reports/logs/*.log
+reports/allure-results/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Environment Variables
+.env
+.env.local
+
+# Browser Drivers (optional, if managed externally)
+# drivers/*.exe
+# drivers/chromedriver
+# drivers/geckodriver
+# drivers/msedgedriver
+
+# Test Data (if sensitive)
+# test_data/*.xlsx
+# test_data/*.csv
+
+# Temporary Files
+*.tmp
+*.bak
