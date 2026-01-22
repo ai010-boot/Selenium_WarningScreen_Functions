@@ -6,79 +6,68 @@ import openpyxl
 from pathlib import Path
 from utils.logger import Logger
 
-
 class ExcelReader:
-    """Excel 读取器类"""
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.workbook = None
+        self.sheet_names = []
+        
+        try:
+            # 使用openpyxl加载工作簿
+            self.workbook = openpyxl.load_workbook(file_path, read_only=True)
+            self.sheet_names = self.workbook.sheetnames
+        except Exception as e:
+            raise Exception(f"加载Excel文件失败: {e}")
     
-    def __init__(self, filepath):
-        """
-        初始化 Excel 读取器
-        
-        Args:
-            filepath: Excel 文件路径
-        """
-        self.filepath = Path(filepath)
-        self.logger = Logger().get_logger()
-        
-        if not self.filepath.exists():
-            raise FileNotFoundError(f"文件不存在: {filepath}")
-        
-        self.workbook = openpyxl.load_workbook(self.filepath)
-        self.logger.info(f"已加载 Excel 文件: {filepath}")
-    
-    def get_sheet_names(self):
-        """获取所有工作表名称"""
-        return self.workbook.sheetnames
-    
-    def get_sheet_data(self, sheet_name=None, has_header=True):
-        """
-        读取工作表数据
-        
-        Args:
-            sheet_name: 工作表名称，默认读取第一个工作表
-            has_header: 是否包含表头
-        
-        Returns:
-            列表形式的数据
-        """
-        if sheet_name:
-            sheet = self.workbook[sheet_name]
-        else:
-            sheet = self.workbook.active
-        
+    def get_sheet_data(self, sheet_name):
+        """获取指定工作表的数据"""
+        if self.workbook is None:
+            raise Exception("工作簿未加载成功")
+            
+        if sheet_name not in self.sheet_names:
+            raise ValueError(f"工作表 '{sheet_name}' 不存在")
+            
+        sheet = self.workbook[sheet_name]
         data = []
-        rows = list(sheet.iter_rows(values_only=True))
         
-        if has_header and len(rows) > 0:
-            headers = rows[0]
-            for row in rows[1:]:
-                row_data = dict(zip(headers, row))
-                data.append(row_data)
-        else:
-            data = [list(row) for row in rows]
+        # 获取标题行
+        headers = []
+        for cell in sheet[1]:
+            headers.append(cell.value)
         
-        self.logger.info(f"从工作表 '{sheet.title}' 读取了 {len(data)} 行数据")
+        # 过滤掉空的标题
+        if not any(headers):
+            return data
+        
+        # 获取数据行
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            # 跳过全空行
+            if not any(row):
+                continue
+            row_data = {}
+            for i, value in enumerate(row):
+                if i < len(headers):  # 防止索引超出范围
+                    row_data[headers[i]] = value
+            data.append(row_data)
+            
         return data
     
     def get_cell_value(self, sheet_name, row, col):
-        """
-        获取指定单元格的值
-        
-        Args:
-            sheet_name: 工作表名称
-            row: 行号（从1开始）
-            col: 列号（从1开始）
-        
-        Returns:
-            单元格值
-        """
+        """获取指定单元格的值"""
+        if self.workbook is None:
+            raise Exception("工作簿未加载成功")
+            
+        if sheet_name not in self.sheet_names:
+            raise ValueError(f"工作表 '{sheet_name}' 不存在")
+            
         sheet = self.workbook[sheet_name]
-        return sheet.cell(row=row, column=col).value
+        cell = sheet.cell(row=row, column=col)
+        return cell.value
     
     def close(self):
         """关闭工作簿"""
-        self.workbook.close()
-        self.logger.info(f"已关闭 Excel 文件: {self.filepath}")
+        if self.workbook:
+            self.workbook.close()
 
 
 def read_excel_data(filepath, sheet_name=None):

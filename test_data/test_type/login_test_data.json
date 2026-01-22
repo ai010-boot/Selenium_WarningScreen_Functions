@@ -1,0 +1,40 @@
+{
+  "login_test_data": [
+    {
+      "username": "jkcsdw",
+      "password": "123456",
+      "description": "有效用户登录",
+      "expected_result": "success"
+    },
+    {
+      "username": "invalid_user",
+      "password": "password123",
+      "description": "无效用户名",
+      "expected_result": "failure"
+    },
+    {
+      "username": "jkcsdw",
+      "password": "wrong_password",
+      "description": "错误密码",
+      "expected_result": "failure"
+    },
+    {
+      "username": "",
+      "password": "password123",
+      "description": "空用户名",
+      "expected_result": "failure"
+    },
+    {
+      "username": "testuser",
+      "password": "",
+      "description": "空密码",
+      "expected_result": "failure"
+    },
+    {
+      "username": "",
+      "password": "",
+      "description": "用户名密码均为空",
+      "expected_result": "failure"
+    }
+  ]
+}

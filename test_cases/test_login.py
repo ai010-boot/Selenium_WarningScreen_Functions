@@ -30,7 +30,6 @@ class TestLogin:
         
         # 验证登录成功
         assert login_page.is_login_successful(), "登录应该成功"
-        
     
     @pytest.mark.regression
     def test_invalid_username(self, driver):
@@ -123,7 +122,6 @@ class TestLogin:
         
         # 验证登录成功
         assert login_page.is_login_successful(), "登录应该成功"
-        
     
     @pytest.mark.regression
     def test_login_page_elements(self, driver):

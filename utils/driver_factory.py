@@ -10,6 +10,8 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from config.config import Config
 from utils.logger import Logger
 
@@ -53,11 +55,8 @@ class DriverFactory:
         if Config.HEADLESS:
             options.add_argument('--headless')
         
-        try:
-            driver = webdriver.Firefox(options=options)
-        except Exception as e:
-            cls.logger.warning(f"使用本地驱动失败: {e}")
-            driver = webdriver.Firefox(options=options)
+        service = FirefoxService(GeckoDriverManager().install())
+        driver = webdriver.Firefox(service=service, options=options)
         
         cls.logger.info("Firefox 浏览器启动成功")
         return driver
@@ -74,11 +73,8 @@ class DriverFactory:
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--start-maximized')
         
-        try:
-            driver = webdriver.Edge(options=options)
-        except Exception as e:
-            cls.logger.warning(f"使用本地驱动失败: {e}")
-            driver = webdriver.Edge(options=options)
+        service = EdgeService(EdgeChromiumDriverManager().install())
+        driver = webdriver.Edge(service=service, options=options)
         
         cls.logger.info("Edge 浏览器启动成功")
         return driver

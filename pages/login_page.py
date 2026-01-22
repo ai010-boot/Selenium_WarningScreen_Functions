@@ -1,45 +1,41 @@
 """
-登录页面对象模块
+# 登录页面对象类
+ 登录页面的业务封装（登录方法、元素定位、状态验证）
+
 """
-from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
 from config.config import Config
+from locators.login_locators import LoginPageLocators
 
 
 class LoginPage(BasePage):
     """登录页面对象类"""
     
-    # 元素定位器
-    LOGIN_OPTIONS = (By.ID, "tab-password")
-    USERNAME_INPUT = (By.XPATH, "//input[@placeholder='账号']")
-    PASSWORD_INPUT = (By.XPATH, "//input[@placeholder='密码']")
-    LOGIN_BUTTON = (By.XPATH, "//button[@type='button']//span[text()='登 录']")
-    PROMPT_MESSAGE = (By.CSS_SELECTOR, ".el-message__content")
-  
+    # 从 LoginPageLocators 引用元素定位器
+    LOGIN_OPTIONS = LoginPageLocators.LOGIN_OPTIONS
+    USERNAME_INPUT = LoginPageLocators.USERNAME_INPUT
+    PASSWORD_INPUT = LoginPageLocators.PASSWORD_INPUT
+    LOGIN_BUTTON = LoginPageLocators.LOGIN_BUTTON
+    PROMPT_MESSAGE = LoginPageLocators.PROMPT_MESSAGE
     
     def __init__(self, driver):
         """
         初始化登录页面
         """
         super().__init__(driver)
-        self.url = f"{Config.BASE_URL}/screen/login"
+        self.url = Config.BASE_URL
     
     def navigate_to_login(self):
         """导航到登录页面"""
         self.driver.get(self.url)
         self.logger.info(f"导航到登录页面: {self.url}")
 
-    def select_login_option(self):
+    def select_login_option(self, option=None):
         """
         选择登录选项（点击切换到账号密码登录）
         """
-        # 检查登录选项元素是否存在
-        if self.is_element_present(self.LOGIN_OPTIONS):
-            # 查找并点击登录选项元素
-            self.click(self.LOGIN_OPTIONS)
-            self.logger.info("已切换到密码登录选项卡")
-        else:
-            self.logger.info("登录选项卡不存在，使用默认登录方式")
+        # 查找并点击登录选项元素
+        self.find_element(self.LOGIN_OPTIONS).click()
     
     def enter_username(self, username):
         """
@@ -98,7 +94,7 @@ class LoginPage(BasePage):
         """
         if self.is_element_visible(self.PROMPT_MESSAGE, timeout=5):
             message_text = self.get_text(self.PROMPT_MESSAGE)
-            if any(keyword in message_text.lower() for keyword in '登录成功'):
+            if any(keyword in message_text.lower() for keyword in ['登录成功']):
                 return message_text
         return None
     
@@ -111,11 +107,11 @@ class LoginPage(BasePage):
         # 检查是否跳转到主页或显示成功消息
         try:
             # 检查URL是否改变（表明已登录并跳转）
-            current_url = self.get_current_url()
+            url_changed = self.get_current_url() != self.url
             # 检查是否有成功消息
             has_success_message = self.get_success_message() is not None
             # 如果URL改变了或者有成功提示，则认为登录成功
-            return has_success_message or (current_url != self.url and "/screen/login" not in current_url)
+            return url_changed or has_success_message
         except Exception:
             return False
     
