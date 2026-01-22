@@ -1,0 +1,231 @@
+根据您项目的POM架构和定位器集中管理规范，当您新增一个页面的自动化测试时，需要按照以下步骤创建对应的文件：
+
+---
+
+## 📝 新增页面自动化需要创建的文件
+
+### 以新增"首页(Home)"为例：
+
+### 1️⃣ **locators/home_locators.py** （元素定位器）
+```python
+"""
+首页元素定位器
+"""
+from selenium.webdriver.common.by import By
+
+
+class HomePageLocators:
+    """首页元素定位器"""
+    
+    # 导航栏
+    LOGO = (By.XPATH, "//h2[contains(text(),'智慧消防预警平台')]")
+    USER_MENU = (By.XPATH, "//div[@class='user-info']")
+    LOGOUT_BUTTON = (By.XPATH, "//button[contains(text(),'退出')]")
+    
+    # 主要内容
+    DASHBOARD_TITLE = (By.XPATH, "//h1[@class='dashboard-title']")
+    STATISTICS_PANEL = (By.CLASS_NAME, "statistics-panel")
+```
+
+**作用**: 集中管理首页所有元素的定位方式
+
+---
+
+### 2️⃣ **pages/home_page.py** （页面对象类）
+```python
+"""
+首页页面对象类
+"""
+from pages.base_page import BasePage
+from config.config import Config
+from locators.home_locators import HomePageLocators
+
+
+class HomePage(BasePage):
+    """首页页面对象类"""
+    
+    # 从 HomePageLocators 引用元素定位器
+    LOGO = HomePageLocators.LOGO
+    USER_MENU = HomePageLocators.USER_MENU
+    LOGOUT_BUTTON = HomePageLocators.LOGOUT_BUTTON
+    DASHBOARD_TITLE = HomePageLocators.DASHBOARD_TITLE
+    
+    def __init__(self, driver):
+        """初始化首页"""
+        super().__init__(driver)
+        self.url = Config.BASE_URL.replace('/login', '/home')
+    
+    def navigate_to_home(self):
+        """导航到首页"""
+        self.driver.get(self.url)
+        self.logger.info(f"导航到首页: {self.url}")
+    
+    def is_on_home_page(self):
+        """检查是否在首页"""
+        return self.is_element_visible(self.LOGO, timeout=5)
+    
+    def click_logout(self):
+        """点击退出按钮"""
+        self.click(self.LOGOUT_BUTTON)
+        self.logger.info("点击退出登录")
+    
+    def get_dashboard_title(self):
+        """获取仪表盘标题"""
+        return self.get_text(self.DASHBOARD_TITLE)
+```
+
+**作用**: 封装首页的业务操作方法
+
+---
+
+### 3️⃣ **test_cases/test_home.py** （测试用例）
+```python
+"""
+首页功能测试用例
+"""
+import pytest
+from pages.login_page import LoginPage
+from pages.home_page import HomePage
+from config.config import Config
+
+
+class TestHome:
+    """首页功能测试类"""
+    
+    @pytest.fixture(autouse=True)
+    def setup(self, driver):
+        """测试前置：登录"""
+        self.driver = driver
+        login_page = LoginPage(driver)
+        login_page.navigate_to_login()
+        login_page.login(
+            Config.TEST_USER['username'],
+            Config.TEST_USER['password']
+        )
+    
+    @pytest.mark.smoke
+    def test_home_page_loads(self, driver):
+        """测试首页是否正确加载"""
+        home_page = HomePage(driver)
+        assert home_page.is_on_home_page(), "首页应该加载成功"
+    
+    @pytest.mark.regression
+    def test_logout_functionality(self, driver):
+        """测试退出登录功能"""
+        home_page = HomePage(driver)
+        home_page.click_logout()
+        # 验证返回登录页
+        assert "login" in driver.current_url.lower()
+```
+
+**作用**: 编写首页的测试用例
+
+---
+
+### 4️⃣ **test_data/test_type/home_test_data.csv** （可选：数据驱动）
+
+如果需要数据驱动测试，创建数据文件：
+
+```csv
+test_scenario,expected_result,description
+dashboard_visible,success,仪表盘可见
+user_menu_accessible,success,用户菜单可访问
+logout_works,success,退出登录正常
+```
+
+并在 `test_data/test_data_config.py` 中注册：
+
+```python
+TEST_DATA_PATHS = {
+    'login': {...},
+    'home': {  # 新增
+        'csv': PROJECT_ROOT / 'test_data' / 'test_type' / 'home_test_data.csv',
+        'json': PROJECT_ROOT / 'test_data' / 'test_type' / 'home_test_data.json',
+        'xlsx': PROJECT_ROOT / 'test_data' / 'test_type' / 'home_test_data.xlsx'
+    },
+}
+```
+
+---
+
+### 5️⃣ **更新 locators/__init__.py**
+
+```python
+"""
+元素定位器模块
+集中管理所有页面的元素定位器
+"""
+from .login_locators import LoginPageLocators
+from .home_locators import HomePageLocators  # 新增
+
+__all__ = [
+    'LoginPageLocators',
+    'HomePageLocators',  # 新增
+]
+```
+
+---
+
+## 📋 完整清单
+
+### 必需文件（3个）
+1. ✅ `locators/home_locators.py` - 元素定位器
+2. ✅ `pages/home_page.py` - 页面对象类
+3. ✅ `test_cases/test_home.py` - 测试用例
+
+### 需要更新的文件（1个）
+4. ✅ `locators/__init__.py` - 添加新的定位器导出
+
+### 可选文件（数据驱动）
+5. ⭕ `test_data/test_type/home_test_data.csv/json/xlsx` - 测试数据
+6. ⭕ `test_data/test_data_config.py` - 注册数据路径（如果使用数据驱动）
+
+---
+
+## 🔄 标准工作流程
+
+```
+步骤1: 创建定位器
+    ↓ locators/xxx_locators.py
+    
+步骤2: 创建页面对象
+    ↓ pages/xxx_page.py
+    
+步骤3: 编写测试用例
+    ↓ test_cases/test_xxx.py
+    
+步骤4: 更新导出
+    ↓ locators/__init__.py
+    
+步骤5: (可选) 数据驱动
+    ↓ test_data/test_type/xxx_test_data.csv
+```
+
+---
+
+## 💡 快速模板
+
+您可以直接复制 `login` 相关文件作为模板：
+
+```bash
+# 复制模板
+cp locators/login_locators.py locators/home_locators.py
+cp pages/login_page.py pages/home_page.py
+cp test_cases/test_login.py test_cases/test_home.py
+
+# 然后修改类名和定位器即可
+```
+
+---
+
+## 🎯 关键点提醒
+
+1. **定位器集中管理** - 所有元素定位写在 `locators/` 目录
+2. **页面对象引用** - `pages/` 中的类只引用定位器，不直接写定位表达式
+3. **继承 BasePage** - 所有页面类都继承 `BasePage` 获得通用方法
+4. **使用 Config** - URL、账号等配置从 `Config` 类获取
+5. **标记测试** - 使用 `@pytest.mark.smoke` 等标记测试类型
+
+---
+
+**总结**：新增一个页面，最少需要创建 **3个文件** + 更新 **1个文件**，如果需要数据驱动再额外创建数据文件。整个过程就是复制模板改名改定位器！🚀

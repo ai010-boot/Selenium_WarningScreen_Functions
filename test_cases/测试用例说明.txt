@@ -1,0 +1,64 @@
+"""
+测试用例结构说明
+===============
+
+## test_cases/ 目录结构
+
+### 正式测试用例（会被执行）
+- test_login.py - 登录功能测试（传统方式）
+- test_login_csv_driven.py - 登录功能测试（数据驱动版本，使用CSV）
+
+### examples/ 示例文件夹（仅供参考）
+包含各种测试示例，不会在正常测试运行中执行：
+- test_login_data_driven.py - 完整的数据驱动测试示例（推荐参考）
+- test_login_csv_driven.py - 使用CSV格式的数据驱动示例
+- test_login_json_driven.py - 使用JSON格式的数据驱动示例
+- test_login_excel_driven.py - 使用Excel格式的数据驱动示例
+- test_data_usage_example.py - 数据配置使用演示
+- test_example_new_module.py - 新模块测试数据配置示例
+
+## 当前使用的数据驱动方式
+
+### 测试文件: test_login_csv_driven.py
+- 数据格式: CSV
+- 数据文件: test_data/test_type/login_test_data.csv
+- 测试数量: 6个用例（1个成功，5个失败场景）
+
+### 运行命令
+```bash
+# 运行CSV数据驱动测试
+pytest test_cases/test_login_csv_driven.py -v
+
+# 运行所有登录测试
+pytest test_cases/test_login*.py -v
+
+# 运行冒烟测试
+pytest test_cases/ -m smoke -v
+```
+
+## 切换数据源
+
+如果想使用其他数据格式，只需修改 test_login_csv_driven.py 中的一行：
+
+```python
+# 当前使用CSV
+@pytest.mark.parametrize("test_case", get_test_data('login', 'csv'))
+
+# 改为JSON
+@pytest.mark.parametrize("test_case", get_test_data('login', 'json'))
+
+# 改为Excel
+@pytest.mark.parametrize("test_case", get_test_data('login', 'xlsx'))
+
+# 自动检测
+@pytest.mark.parametrize("test_case", get_test_data('login'))
+```
+
+## 添加新的测试模块
+
+1. 在 test_cases/ 目录下创建新的测试文件
+2. 参考 examples/ 中的示例编写测试
+3. 如需数据驱动，使用 get_test_data('模块名')
+
+更多示例请查看 examples/ 文件夹！
+"""

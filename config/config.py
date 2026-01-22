@@ -26,11 +26,11 @@ class Config:
     
     # URL配置
     URLS = {
-        'dev': 'https://dev.example.com',      # 开发环境
-        'test': 'https://test.example.com',    # 测试环境
-        'prod': 'https://aiot.aiysyd.cn/screen',     # 生产环境
+        'dev': 'https://aiot.aiysyd.cn/screen/login',
+        'test': 'https://aiot.aiysyd.cn/screen/login',
+        'prod': 'https://aiot.aiysyd.cn/screen/login'
     }
-    BASE_URL = URLS.get(ENV, URLS['prod'])  # 默认使用新添加的本地URL
+    BASE_URL = URLS.get(ENV, URLS['test'])
     
     # 路径配置
     DRIVERS_DIR = BASE_DIR / 'drivers'
@@ -60,27 +60,12 @@ class Config:
         'password': '',
         'database': 'test_db'
     }
-    
-    @classmethod
-    def get_driver_path(cls, browser_name):
-        """获取浏览器驱动路径"""
-        drivers = {
-            'chrome': 'chromedriver.exe',
-            'firefox': 'geckodriver.exe',
-            'edge': 'msedgedriver.exe'
-        }
-        driver_file = drivers.get(browser_name.lower())
-        if not driver_file:
-            raise ValueError(f"不支持的浏览器: {browser_name}")
-        
-        return str(cls.DRIVERS_DIR / driver_file)
-    
-    @classmethod
-    def ensure_dirs(cls):
-        """确保必要的目录存在"""
-        cls.SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
-        cls.LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
-
-# 确保目录存在
-Config.ensure_dirs()
+# 确保必要目录存在
+for _p in [
+    Config.REPORTS_DIR,
+    Config.SCREENSHOTS_DIR,
+    Config.LOGS_DIR,
+    Config.REPORTS_DIR / 'html',
+]:
+    _p.mkdir(parents=True, exist_ok=True)
