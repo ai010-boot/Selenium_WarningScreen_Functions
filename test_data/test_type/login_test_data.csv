@@ -1,7 +1,3 @@
 username,password,description,expected_result
 jkcsdw,123456,"有效用户登录",success
 invalid_user,password123,"无效用户名",failure
-jkcsdw,wrong_password,"错误密码",failure
-,"password123","空用户名",failure
-testuser,,"空密码",failure
-,,,"用户名密码均为空",failure

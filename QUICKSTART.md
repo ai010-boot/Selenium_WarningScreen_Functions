@@ -1,5 +1,13 @@
 # 快速开始指南
 
+## 项目特性
+
+✅ **定位器集中管理** - 元素定位与页面逻辑分离  
+✅ **数据驱动自动化** - 无需配置，自动查找测试数据  
+✅ **约定优于配置** - 遵循命名约定，减少配置工作  
+✅ **多格式支持** - CSV/JSON/Excel 数据源  
+✅ **POM 最佳实践** - 职责分离，易于维护
+
 ## 1. 环境准备
 
 ### 安装 Python
@@ -35,67 +43,28 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 3. 配置浏览器驱动
+## 3. 配置测试环境
 
-### 方法一：手动下载（推荐用于企业环境）
-1. 下载对应浏览器的驱动：
-   - Chrome: https://chromedriver.chromium.org/
-   - Firefox: https://github.com/mozilla/geckodriver/releases
-   - Edge: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+修改 `config/config.py` 中的配置：
 
-2. 将驱动文件放到 `drivers/` 目录
+```python
+# 浏览器配置
+BROWSER = 'chrome'           # chrome, firefox, edge
+HEADLESS = True              # 是否无头模式
 
-3. 确保驱动版本与浏览器版本匹配
+# 测试用户
+TEST_USER = {
+    'username': 'jkcsdw',
+    'password': '123456'
+}
 
-### 方法二：使用 webdriver-manager（可选）
-```bash
-pip install webdriver-manager
+# 测试 URL
+BASE_URL = 'https://aiot.aiysyd.cn/screen/login'
 ```
 
-然后在 `utils/driver_factory.py` 中启用自动管理。
+## 4. 运行测试
 
-## 4. 配置测试环境
-
-### 复制环境变量文件
-```bash
-cp .env.example .env
-```
-
-### 编辑配置
-修改 `config/config.py` 或 `.env` 文件中的：
-- BASE_URL：测试环境地址
-- TEST_USER：测试账号信息
-- 其他必要配置
-
-## 5. 运行测试
-
-### 运行所有测试
-```bash
-pytest test_cases/
-```
-
-### 运行冒烟测试
-```bash
-pytest -m smoke
-```
-
-### 运行指定测试文件
-```bash
-pytest test_cases/test_login.py
-```
-
-### 指定浏览器
-```bash
-pytest --browser=chrome
-pytest --browser=firefox
-```
-
-### 生成测试报告
-```bash
-pytest --html=reports/html/report.html --self-contained-html
-```
-
-### 使用运行脚本
+### 使用快速命令
 ```bash
 # 运行所有测试
 python run_tests.py all
@@ -103,50 +72,90 @@ python run_tests.py all
 # 运行冒烟测试
 python run_tests.py smoke
 
-# 并行运行（4个进程）
-python run_tests.py parallel 4
+# 运行回归测试
+python run_tests.py regression
+
+# 并行运行测试（4个进程）
+python run_tests.py parallel
+
+# 运行指定测试文件
+python run_tests.py file test_cases/test_login_csv_driven.py
 ```
 
-## 6. 查看测试报告
+## 5. 查看测试报告
 
-测试报告位于 `reports/` 目录：
-- HTML 报告：`reports/html/report.html`
-- 截图：`reports/screenshots/`
-- 日志：`reports/logs/`
+项目支持**四种**报告格式，所有报告都会自动生成：
 
-## 7. 常见问题
+### Allure 报告（推荐）
+```bash
+allure serve reports/allure-results/
+```
+📊 最专业的报告界面，提供详细的测试分析
 
-### Q: 找不到元素
-A: 
-- 检查元素定位器是否正确
-- 增加等待时间
-- 使用显式等待
+### HTMLTestRunner 报告
+```
+reports/htmltestrunner/report.html
+```
+企业级报告风格，统计数据清晰
 
-### Q: 驱动版本不匹配
-A:
-- 确保浏览器驱动版本与浏览器版本匹配
-- 使用 webdriver-manager 自动管理
+### BeautifulReport 报告  
+```
+reports/beautifulreport/report.html
+```
+界面简洁美观，响应式设计
 
-### Q: 测试失败
-A:
-- 查看 `reports/logs/` 中的日志
-- 查看 `reports/screenshots/` 中的截图
-- 检查测试环境是否正常
+### HTMLReport 报告
+```
+reports/html_report/report.html
+```
+生成速度快，自包含HTML，便于远程查看
 
-## 8. 下一步
+## 6. 编写数据驱动测试
 
-- 查看 `README.md` 了解更多详细信息
-- 阅读 `pages/` 目录中的页面对象示例
-- 参考 `test_cases/` 目录中的测试用例示例
-- 根据实际项目修改配置和测试用例
+### 数据文件命名规范
+```
+test_data/test_type/{module_name}_test_data.{csv|json|xlsx}
+```
 
-## 9. 最佳实践
+### 示例
+```python
+import pytest
+from test_data.test_data_config import TestDataConfig
 
-1. 使用虚拟环境隔离依赖
-2. 定期更新浏览器驱动
-3. 编写可维护的测试用例
-4. 使用有意义的测试用例名称
-5. 及时查看测试报告和日志
-6. 不要在版本控制中提交敏感信息
+data = TestDataConfig.load_test_data('login')
 
-祝测试顺利！
+@pytest.mark.parametrize("test_case", data)
+def test_login(self, driver, test_case):
+    username = test_case['username']
+    password = test_case['password']
+    # 测试代码...
+```
+
+## 7. 项目结构说明
+
+```
+├── config/                    # 配置文件
+│   └── config.py             # 全局配置
+├── locators/                  # 元素定位器
+│   └── {module}_locators.py
+├── pages/                     # 页面对象
+│   ├── base_page.py
+│   └── {module}_page.py
+├── test_cases/                # 测试用例
+│   ├── conftest.py
+│   └── test_*.py
+├── test_data/                 # 测试数据
+│   ├── test_data_config.py
+│   └── test_type/             # 数据文件位置
+├── utils/                     # 工具类
+│   ├── driver_factory.py
+│   ├── logger.py
+│   ├── screenshot.py
+│   └── excel_reader.py
+├── reports/                   # 测试报告
+│   ├── allure-results/
+│   ├── html/
+│   ├── html_report/
+│   └── screenshots/
+└── drivers/                   # 浏览器驱动
+```

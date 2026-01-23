@@ -19,7 +19,7 @@ def driver(request):
     yield driver  # 提供给测试用例使用
     
     # 测试失败时自动截图
-    if request.node.rep_call.failed:
+    if hasattr(request.node, 'rep_call') and request.node.rep_call.failed:
         test_name = request.node.name
         Screenshot.take_screenshot(driver, f"failed_{test_name}")
     

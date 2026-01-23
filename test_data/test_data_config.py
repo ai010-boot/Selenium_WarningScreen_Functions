@@ -1,6 +1,34 @@
 """
-通用测试数据配置文件
-统一管理所有测试数据，便于在不同模块中引用
+通用测试数据配置文件 - 自动查找模式（无需配置）
+
+约定优于配置原则：
+    1. 数据文件命名：{module_name}_test_data.{csv|json|xlsx}
+    2. 文件位置：test_data/test_type/ 目录
+    3. 自动查找优先级：csv > json > xlsx
+
+快速使用：
+    # 1. 自动查找（推荐）
+    data = get_test_data('login')  # 自动找 login_test_data.csv/json/xlsx
+    
+    # 2. 指定格式
+    data = get_test_data('login', 'csv')   # 使用 CSV
+    data = get_test_data('login', 'json')  # 使用 JSON
+    data = get_test_data('login', 'xlsx')  # 使用 Excel
+    
+    # 3. 在测试用例中使用
+    @pytest.mark.parametrize("test_case", get_test_data('login'))
+    def test_login(self, driver, test_case):
+        username = test_case['username']
+        password = test_case['password']
+
+添加新模块（无需修改代码）：
+    步骤1: 创建数据文件
+        test_data/test_type/home_test_data.csv  # 任选 CSV/JSON/XLSX
+    
+    步骤2: 直接使用
+        data = get_test_data('home')  # 自动找到并加载
+    
+    就这么简单！无需任何配置！
 """
 import os
 import json
@@ -11,57 +39,98 @@ from typing import Dict, List, Any
 
 class TestDataConfig:
     """
-    测试数据配置类
-    统一管理所有测试数据，提供便捷的访问接口
+    测试数据配置类 - 自动查找模式（无需配置）
+    
+    约定优于配置：
+        - 数据文件命名：{module_name}_test_data.{csv|json|xlsx}
+        - 文件位置：test_data/test_type/ 目录
+        - 自动查找优先级：csv > json > xlsx
+    
+    使用示例：
+        # 自动查找
+        data = get_test_data('login')  # 自动找 login_test_data.csv/json/xlsx
+        
+        # 指定格式
+        data = get_test_data('login', 'csv')
+        
+        # 添加新模块：只需创建文件，无需修改代码
+        # 1. 创建 test_data/test_type/home_test_data.csv
+        # 2. 直接使用 get_test_data('home')
     """
     
     # 项目根目录
     PROJECT_ROOT = Path(__file__).parent.parent
     
-    # 测试数据文件路径配置
-    TEST_DATA_PATHS = {
-        'login': {
-            'csv': PROJECT_ROOT / 'test_data' / 'test_type' / 'login_test_data.csv',
-            'json': PROJECT_ROOT / 'test_data' / 'test_type' /  'login_test_data.json',
-            'xlsx': PROJECT_ROOT / 'test_data' / 'test_type' /  'login_test_data.xlsx'
-        },
-        # 可以在这里添加更多模块的测试数据路径
-        # 'home': {
-        #     'csv': PROJECT_ROOT / 'test_data' / 'home_test_data.csv',
-        #     'json': PROJECT_ROOT / 'test_data' / 'home_test_data.json',
-        #     'xlsx': PROJECT_ROOT / 'test_data' / 'home_test_data.xlsx'
-        # },
-    }
-    
     @classmethod
     def load_test_data(cls, module_name: str, data_format: str = 'auto') -> List[Dict[str, Any]]:
         """
-        加载指定模块的测试数据
+        加载指定模块的测试数据（自动查找，无需配置）
+        
+        约定：
+            - 数据文件命名规范：{module_name}_test_data.{格式}
+            - 数据文件位置：test_data/test_type/ 目录下
+            - 支持格式：csv, json, xlsx
         
         Args:
-            module_name: 模块名称（如 'login', 'home' 等）
+            module_name: 模块名称（如 'login', 'home', 'search'）
             data_format: 数据格式 ('csv', 'json', 'xlsx', 'auto')
+                        'auto' 时按 csv > json > xlsx 优先级自动查找
             
         Returns:
             测试数据列表
+            
+        示例：
+            # 自动查找 login_test_data.csv/json/xlsx
+            get_test_data('login')
+            
+            # 指定使用 CSV 格式
+            get_test_data('login', 'csv')
+            
+            # 添加新模块无需配置，只需创建文件：
+            # test_data/test_type/home_test_data.csv
+            get_test_data('home')
         """
-        if module_name not in cls.TEST_DATA_PATHS:
-            raise ValueError(f"未找到模块 {module_name} 的测试数据配置")
+        # 基础路径：test_data/test_type/
+        base_path = cls.PROJECT_ROOT / 'test_data' / 'test_type'
         
         # 确定要使用的数据格式
         if data_format == 'auto':
-            # 按优先级查找可用的数据文件
+            # 按优先级自动查找文件：csv > json > xlsx
             for fmt in ['csv', 'json', 'xlsx']:
-                if fmt in cls.TEST_DATA_PATHS[module_name]:
-                    data_file = cls.TEST_DATA_PATHS[module_name][fmt]
-                    if os.path.exists(data_file):
+                file_path = base_path / f'{module_name}_test_data.{fmt}'
+                if file_path.exists():
+                    data_format = fmt
+                    data_file = file_path
+                    break
+                else:
+                    # 递归查找（兼容示例子目录等）
+                    matches = list(base_path.rglob(f'{module_name}_test_data.{fmt}'))
+                    if matches:
                         data_format = fmt
+                        data_file = matches[0]
                         break
+            else:
+                # 未找到任何格式的文件
+                raise FileNotFoundError(
+                    f"未找到模块 '{module_name}' 的测试数据文件\n"
+                    f"请在以下位置创建数据文件：\n"
+                    f"  - {base_path / f'{module_name}_test_data.csv'}\n"
+                    f"  - {base_path / f'{module_name}_test_data.json'}\n"
+                    f"  - {base_path / f'{module_name}_test_data.xlsx'}"
+                )
         else:
-            data_file = cls.TEST_DATA_PATHS[module_name][data_format]
-        
-        if not os.path.exists(data_file):
-            raise FileNotFoundError(f"找不到测试数据文件: {data_file}")
+            # 使用指定格式
+            data_file = base_path / f'{module_name}_test_data.{data_format}'
+            if not data_file.exists():
+                # 递归查找（兼容示例子目录等）
+                matches = list(base_path.rglob(f'{module_name}_test_data.{data_format}'))
+                if matches:
+                    data_file = matches[0]
+                else:
+                    raise FileNotFoundError(
+                        f"找不到测试数据文件: {data_file}\n"
+                        f"请创建文件或使用 data_format='auto' 自动查找"
+                    )
         
         # 根据文件格式加载数据
         if data_format == 'csv':
@@ -71,7 +140,7 @@ class TestDataConfig:
         elif data_format == 'xlsx':
             return cls._load_excel_data(data_file)
         else:
-            raise ValueError(f"不支持的数据格式: {data_format}")
+            raise ValueError(f"不支持的数据格式: {data_format}，支持：csv, json, xlsx")
     
     @classmethod
     def _load_csv_data(cls, file_path: Path) -> List[Dict[str, Any]]:

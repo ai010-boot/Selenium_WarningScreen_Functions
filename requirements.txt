@@ -1,11 +1,20 @@
-selenium==4.16.0
-pytest==7.4.3
-pytest-html==4.1.1
-pytest-xdist==3.5.0
-allure-pytest==2.13.2
-openpyxl==3.1.2
-PyYAML==6.0.1
-requests==2.31.0
-Pillow==10.1.0
-python-dotenv==1.0.0
-webdriver-manager==4.0.1
+# Selenium for web automation
+selenium>=4.0.0
+
+# Pytest for testing framework
+pytest>=7.0.0
+pytest-html>=3.1.1
+pytest-xdist>=2.5.0
+allure-pytest>=2.9.45
+pytest-rerunfailures>=10.2
+
+# HTML reporting tools
+html-testRunner>=1.2.0
+BeautifulReport>=0.1.3
+pytest-html-reporter
+
+# Excel handling
+openpyxl>=3.0.9
+
+# Other utilities
+webdriver-manager>=3.7.1
