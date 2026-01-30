@@ -144,10 +144,12 @@ class TestDataConfig:
     
     @classmethod
     def _load_csv_data(cls, file_path: Path) -> List[Dict[str, Any]]:
-        """加载CSV格式的测试数据"""
+        """加载CSV格式的测试数据（支持 # 开头的注释行）"""
         data = []
         with open(file_path, 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
+            # 过滤掉以 # 开头的注释行和空行
+            lines = [line for line in file if line.strip() and not line.strip().startswith('#')]
+            reader = csv.DictReader(lines)
             for row in reader:
                 # 处理空值：将空字符串转换为None（可选）或保持原样
                 # 过滤掉所有字段都为空的行

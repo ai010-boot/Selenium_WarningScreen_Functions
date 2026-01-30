@@ -15,7 +15,8 @@ class Config:
     
     # 浏览器配置
     BROWSER = os.getenv('BROWSER', 'chrome')  # chrome, firefox, edge
-    HEADLESS = os.getenv('HEADLESS', 'True').lower() == 'true'  # 启用无头模式，提升测试速度
+    # HEADLESS = os.getenv('HEADLESS', 'True').lower() == 'true'  # 启用无头模式，提升测试速度
+    HEADLESS = os.getenv('HEADLESS', 'True').lower() == 'False'  # 启用有头模式，实时预览
     
     # 超时配置（优化后）
     IMPLICIT_WAIT = 5  # 隐式等待（秒）
@@ -35,11 +36,9 @@ class Config:
     LOGS_DIR = REPORTS_DIR / 'logs'
     TEST_DATA_DIR = BASE_DIR / 'test_data'
     
-    # 四种报告输出路径
+    # 报告输出路径（三种格式）
     ALLURE_DIR = REPORTS_DIR / 'allure-results'
     HTMLREPORT_DIR = REPORTS_DIR / 'html_report'
-    HTMLTESTRUNNER_DIR = REPORTS_DIR / 'htmltestrunner'
-    BEAUTIFULREPORT_DIR = REPORTS_DIR / 'beautifulreport'
     
     # 截图配置
     SCREENSHOT_ON_FAILURE = True
@@ -47,12 +46,7 @@ class Config:
     # 日志配置
     LOG_LEVEL = 'INFO'
     LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    
-    # 测试数据
-    TEST_USER = {
-        'username': 'jkcsdw',
-        'password': '123456'
-    }
+
 
 # 确保必要目录存在
 for _p in [
@@ -62,7 +56,5 @@ for _p in [
     Config.REPORTS_DIR / 'html',
     Config.ALLURE_DIR,
     Config.HTMLREPORT_DIR,
-    Config.HTMLTESTRUNNER_DIR,
-    Config.BEAUTIFULREPORT_DIR,
 ]:
     _p.mkdir(parents=True, exist_ok=True)

@@ -67,10 +67,23 @@ class LoginPage(BasePage):
         # 输入用户名和密码
         self.enter_username(username)
         self.enter_password(password)       
-        self.click_login_button()       
-        # 等待加载完成
-        if self.is_element_visible(self.PROMPT_MESSAGE, timeout=2):
+        self.click_login_button()
+        
+        # 点击登录按钮后立即等待一小段时间，让错误弹窗有时间出现
+        import time
+        time.sleep(0.5)  # 等待500毫秒确保弹窗出现
+        
+        # 检查是否有错误提示弹窗，如果有则立即截图
+        if self.is_element_visible(self.PROMPT_MESSAGE, timeout=1):
+            # 有错误弹窗，立即截图
+            from utils.screenshot import Screenshot
+            Screenshot.take_screenshot(self.driver, f"login_error_{username}")
+            self.logger.info(f"检测到错误弹窗，已截图: login_error_{username}")
+            # 等待弹窗消失
             self.wait_for_element_to_disappear(self.PROMPT_MESSAGE, timeout=10)
+        else:
+            # 没有错误弹窗，可能是成功登录，不截图
+            self.logger.info("未检测到错误弹窗")
     
     def get_error_message(self):
         """

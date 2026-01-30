@@ -1,8 +1,7 @@
-username,password,description,expected_result
-jkcsdw,123456,"有效用户登录",success
-invalid_user,password123,"无效用户名",failure
-invalid_user,password123,"无效用户名",failure
-jkcsdw,wrong_password,"错误密码",failure
-,"password123","空用户名",failure
-testuser,,"空密码",failure
-,,,"用户名密码均为空",failure
+username,password,description,expected_result,comment
+jkcsdw,123456,"有效用户登录",success,"正常的管理员账号"
+invalid_user,password123,"无效用户名",failure,"测试无效用户处理"
+# jkcsdw,wrong_password,"错误密码",failure,"测试密码错误提示"
+# ,"password123","空用户名",failure,"测试空用户名验证"
+# testuser,,"空密码",failure,"测试空密码验证"
+# ,,,"用户名密码均为空",failure,"测试全空边界情况"

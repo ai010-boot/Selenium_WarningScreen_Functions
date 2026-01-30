@@ -1,12 +1,11 @@
 """
 测试执行脚本
 提供便捷的测试运行入口
-支持的报告格式：Allure、HTMLTestRunner、BeautifulReport、HTMLReport
+支持的报告格式：Pytest HTML、HTMLReport、Allure
 """
 import sys
 import os
 import pytest
-import json
 from datetime import datetime
 from typing import Optional
 from pathlib import Path
@@ -22,119 +21,75 @@ def _is_module_available(mod_name: str) -> bool:
         return False
 
 
-def _generate_htmltestrunner_report(test_results_json: Optional[str] = None) -> None:
-    """
-    使用 HTMLTestRunner 生成报告
-    """
-    try:
-        Config.HTMLTESTRUNNER_DIR.mkdir(parents=True, exist_ok=True)
-        report_path = Config.HTMLTESTRUNNER_DIR / "report.html"
-        
-        # 简单的 HTML 模板
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        html_lines = [
-            '<!DOCTYPE html>',
-            '<html>',
-            '<head>',
-            '  <meta charset="utf-8">',
-            '  <title>HTMLTestRunner Report</title>',
-            '  <style>',
-            '    body { font-family: Arial, sans-serif; margin: 20px; }',
-            '    .header { background-color: #333; color: white; padding: 15px; }',
-            '  </style>',
-            '</head>',
-            '<body>',
-            '  <div class="header">',
-            '    <h1>HTMLTestRunner Report</h1>',
-            f'    <p>Generated on: {timestamp}</p>',
-            '  </div>',
-            '  <p>Test report generated successfully.</p>',
-            '</body>',
-            '</html>'
-        ]
-        
-        with open(report_path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(html_lines))
-        
-        print(f"✓ HTMLTestRunner 报告已生成: {report_path}")
-    except Exception as e:
-        print(f"⚠ HTMLTestRunner 报告生成失败: {e}")
-
-
-def _generate_beautifulreport(test_results_file: Optional[str] = None) -> None:
-    """
-    使用 BeautifulReport 生成报告
-    """
-    try:
-        Config.BEAUTIFULREPORT_DIR.mkdir(parents=True, exist_ok=True)
-        report_path = Config.BEAUTIFULREPORT_DIR / "report.html"
-        
-        # 简单的 HTML 模板
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        html_lines = [
-            '<!DOCTYPE html>',
-            '<html>',
-            '<head>',
-            '  <meta charset="utf-8">',
-            '  <meta name="viewport" content="width=device-width, initial-scale=1">',
-            '  <title>BeautifulReport</title>',
-            '  <style>',
-            '    body { font-family: Segoe UI; background: linear-gradient(to bottom, #667eea, #764ba2); min-height: 100vh; }',
-            '    .container { max-width: 1200px; margin: 20px auto; background: white; border-radius: 8px; padding: 30px; }',
-            '    h1 { color: #667eea; }',
-            '  </style>',
-            '</head>',
-            '<body>',
-            '  <div class="container">',
-            '    <h1>Beautiful Test Report</h1>',
-            f'    <p>Generated on: {timestamp}</p>',
-            '    <p>Test report generated successfully.</p>',
-            '  </div>',
-            '</body>',
-            '</html>'
-        ]
-        
-        with open(report_path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(html_lines))
-        
-        print(f"✓ BeautifulReport 报告已生成: {report_path}")
-    except Exception as e:
-        print(f"⚠ BeautifulReport 报告生成失败: {e}")
-
-
 def _add_report_options(args: list) -> None:
     """
-    添加报告生成选项（支持四种报告格式）
+    添加报告生成选项（三种报告格式）
     
     Args:
         args: pytest 参数列表
     """
-    # 1. Pytest HTML
+    # 1. Pytest HTML - 详细的HTML测试报告
     if _is_module_available('pytest_html'):
         args.append('--html=reports/html/report.html')
         args.append('--self-contained-html')
         print("✓ 启用 Pytest HTML 报告")
+    else:
+        print("⚠ pytest-html 未安装，跳过HTML报告")
     
-    # 2. HTMLReport (pytest-html-reporter)
+    # 2. HTMLReport (pytest-html-reporter) - 现代化测试报告
     if _is_module_available('pytest_html_reporter'):
         args.append(f'--html-report={Config.HTMLREPORT_DIR / "report.html"}')
         print("✓ 启用 HTMLReport 报告")
+    else:
+        print("⚠ pytest-html-reporter 未安装，跳过HTMLReport报告")
     
-    # 3. Allure
+    # 3. Allure - 专业级交互式报告
     if _is_module_available('allure_pytest'):
         args.append(f'--alluredir={Config.ALLURE_DIR}')
         print("✓ 启用 Allure 报告")
+    else:
+        print("⚠ allure-pytest 未安装，跳过Allure报告")
 
 
-def _post_generate_reports(json_results_file: Optional[str] = None) -> None:
+def _generate_allure_html() -> None:
     """
-    测试完成后生成其他格式的报告
+    测试完成后自动生成 Allure HTML 报告
     """
-    # 生成 HTMLTestRunner 格式报告
-    _generate_htmltestrunner_report(json_results_file)
+    import subprocess
     
-    # 生成 BeautifulReport 格式报告
-    _generate_beautifulreport(json_results_file)
+    # 定义 Allure HTML 输出目录
+    allure_html_dir = Config.REPORTS_DIR / 'allure-html'
+    
+    try:
+        print("\n🔄 正在生成 Allure HTML 报告...")
+        
+        # 执行 allure generate 命令
+        result = subprocess.run(
+            ['allure', 'generate', str(Config.ALLURE_DIR), '-o', str(allure_html_dir), '--clean'],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            shell=True  # 在 Windows 上使用 shell 模式
+        )
+        
+        if result.returncode == 0:
+            print(f"✓ Allure HTML 报告已生成: {allure_html_dir / 'index.html'}")
+            print(f"  提示：直接用浏览器打开 {allure_html_dir / 'index.html'} 即可查看")
+        else:
+            print(f"⚠ Allure HTML 生成失败")
+            if result.stderr:
+                print(f"  错误信息: {result.stderr}")
+            if result.stdout:
+                print(f"  输出信息: {result.stdout}")
+            
+    except FileNotFoundError:
+        print("\n⚠ Allure 命令行工具未找到")
+        print("  提示：请确认 Allure 已安装并添加到系统 PATH")
+        print("  安装指南: https://docs.qameta.io/allure/#_installing_a_commandline")
+    except subprocess.TimeoutExpired:
+        print("⚠ Allure HTML 生成超时")
+    except Exception as e:
+        print(f"⚠ Allure HTML 生成出错: {e}")
 
 def run_tests(test_path: str, marker: Optional[str] = None) -> int:
     """
@@ -162,11 +117,12 @@ def run_tests(test_path: str, marker: Optional[str] = None) -> int:
     # 添加报告选项
     _add_report_options(args)
     
+    # 运行测试
     exit_code = pytest.main(args)
     
-    # 测试完成后生成其他报告格式
-    json_file = Config.REPORTS_DIR / 'test_results.json'
-    _post_generate_reports(str(json_file) if json_file.exists() else None)
+    # 测试完成后，自动生成 Allure HTML 报告
+    if _is_module_available('allure_pytest'):
+        _generate_allure_html()
     
     return exit_code
 
