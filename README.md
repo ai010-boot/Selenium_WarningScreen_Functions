@@ -1,15 +1,15 @@
 # Selenium Warning Screen Functions - 自动化测试项目
 
 ## 项目简介
-这是一个基于 Page Object Model (POM) 设计模式的企业级 Selenium 自动化测试框架，主要用于 **Warning Screen Functions (AIOT 预警大屏)** 的功能测试。
+这是一个基于 **Page Object Model (POM)** 设计模式的企业级 Selenium 自动化测试框架,主要用于 **AIOT 预警大屏 (Warning Screen Functions)** 的功能测试。
 
 ### 核心特性
-- ✅ **定位器集中管理** - 元素定位与页面逻辑分离
-- ✅ **数据驱动自动化** - 无需配置，自动查找测试数据
-- ✅ **约定优于配置** - 遵循命名约定，减少配置工作
-- ✅ **多格式支持** - 支持 CSV/JSON/Excel 数据源（当前主用 CSV）
-- ✅ **POM 最佳实践** - 职责分离，易于维护
-- ✅ **多报告支持** - Allure、Pytest HTML、HTMLReport、三种报告格式
+- ✅ **定位器集中管理** - 元素定位与页面逻辑分离,易于维护
+- ✅ **数据驱动测试** - 支持 CSV/JSON/Excel 数据源,无需修改代码即可扩展测试场景
+- ✅ **约定优于配置** - 遵循命名约定,减少配置工作
+- ✅ **POM 最佳实践** - 职责清晰分离,代码复用性高
+- ✅ **多报告支持** - Pytest HTML、HTMLReport、Allure 三种专业报告格式
+- ✅ **并行执行** - 支持多进程并行测试,大幅提升执行效率
 
 ## 项目结构
 ```
@@ -66,20 +66,48 @@ pip install -r requirements.txt
 ```
 
 ### 2. 配置环境
-- `config/config.py` 设置测试环境参数（浏览器驱动由 webdriver-manager 自动管理）：
-- `BASE_URL`: 默认指向 https://aiot.aiysyd.cn/screen/login
-- `BROWSER`: 默认 chrome
-- `HEADLESS`: 默认 True (无头模式)
+编辑 `config/config.py` 可调整以下参数(浏览器驱动由 webdriver-manager 自动管理):
+
+| 配置项 | 默认值 | 说明 |
+|--------|--------|------|
+| `BASE_URL` | `https://aiot.aiysyd.cn/screen/login` | 测试环境地址 |
+| `BROWSER` | `chrome` | 浏览器类型 (chrome/firefox/edge) |
+| `HEADLESS` | `True` | 无头模式(True=后台运行,False=显示浏览器) |
+| `IMPLICIT_WAIT` | `5` | 隐式等待时间(秒) |
+| `EXPLICIT_WAIT` | `10` | 显式等待时间(秒) |
 
 ## 运行测试
 
 ### 快速命令
 ```bash
+# 基础运行
 python run_tests.py all                                    # 运行所有测试
-python run_tests.py smoke                                  # 运行冒烟测试
-python run_tests.py parallel 4                             # 并行运行（4个进程）
+python run_tests.py smoke                                  # 运行冒烟测试(快速验证)
 python run_tests.py file test_cases/test_login_csv_driven.py  # 运行指定文件
+
+# 并行执行(推荐,大幅提速)
+python run_tests.py parallel 4                             # 4个进程并行运行
 ```
+
+### 性能优化建议
+
+**提升测试速度的方法**:
+
+1. **启用无头模式** (速度提升 30-50%)
+   ```python
+   # config/config.py
+   HEADLESS = True  # 后台运行,不显示浏览器窗口
+   ```
+
+2. **并行执行** (速度提升 2-4倍)
+   ```bash
+   python run_tests.py parallel 4  # 根据CPU核心数调整进程数
+   ```
+
+3. **只运行关键测试**
+   ```bash
+   python run_tests.py smoke  # 只运行标记为 @pytest.mark.smoke 的用例
+   ```
 
 ## 报告系统
 
@@ -147,9 +175,38 @@ allure serve reports/allure-results
 更多示例请参考 `test_cases/examples/` 目录。
 
 ## 技术栈
-- Selenium WebDriver (4.x)
-- pytest
-- Allure Report
-- HTMLReport
-- Pytest HTML
-- Python 3.x
+
+### 核心框架
+- **Python 3.8+** - 编程语言
+- **Selenium WebDriver 4.x** - 浏览器自动化引擎
+- **pytest** - 测试框架
+- **webdriver-manager** - 自动管理浏览器驱动
+
+### 测试报告
+- **Allure Report** - 专业级交互式报告(推荐)
+- **pytest-html** - 简洁实用的HTML报告
+- **pytest-html-reporter** - 现代化UI报告
+
+### 设计模式
+- **Page Object Model (POM)** - 页面对象模式
+- **Data-Driven Testing** - 数据驱动测试
+
+## 常见问题
+
+### Q: 如何查看浏览器执行过程?
+A: 修改 `config/config.py` 中的 `HEADLESS = False`,测试时会显示浏览器窗口。
+
+### Q: 测试运行太慢怎么办?
+A: 使用并行执行 `python run_tests.py parallel 4` 或启用无头模式 `HEADLESS = True`。
+
+### Q: Allure 报告显示 404 错误?
+A: 不能直接双击打开,需要使用命令 `allure open reports/allure-html` 或 `allure serve reports/allure-results`。
+
+### Q: 如何添加新的测试数据?
+A: 编辑 `test_data/test_type/login_test_data.csv`,添加新行即可,无需修改代码。
+
+## 项目维护
+
+- **作者**: 自动化测试团队
+- **测试对象**: AIOT 预警大屏系统
+- **更新日期**: 2026-01-30
