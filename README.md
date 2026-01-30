@@ -9,7 +9,7 @@
 - ✅ **约定优于配置** - 遵循命名约定，减少配置工作
 - ✅ **多格式支持** - 支持 CSV/JSON/Excel 数据源（当前主用 CSV）
 - ✅ **POM 最佳实践** - 职责分离，易于维护
-- ✅ **多报告支持** - Allure、Pytest HTML、HTMLReport、BeautifulReport 四种报告格式
+- ✅ **多报告支持** - Allure、Pytest HTML、HTMLReport、三种报告格式
 
 ## 项目结构
 ```
@@ -66,7 +66,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. 配置环境
-编辑 `config/config.py` 设置测试环境参数（浏览器驱动由 webdriver-manager 自动管理）：
+- `config/config.py` 设置测试环境参数（浏览器驱动由 webdriver-manager 自动管理）：
 - `BASE_URL`: 默认指向 https://aiot.aiysyd.cn/screen/login
 - `BROWSER`: 默认 chrome
 - `HEADLESS`: 默认 True (无头模式)

@@ -15,8 +15,8 @@ class Config:
     
     # 浏览器配置
     BROWSER = os.getenv('BROWSER', 'chrome')  # chrome, firefox, edge
-    # HEADLESS = os.getenv('HEADLESS', 'True').lower() == 'true'  # 启用无头模式，提升测试速度
-    HEADLESS = os.getenv('HEADLESS', 'True').lower() == 'False'  # 启用有头模式，实时预览
+    HEADLESS = os.getenv('HEADLESS', 'True').lower() == 'true'  # 启用无头模式，提升测试速度
+    # HEADLESS = os.getenv('HEADLESS', 'True').lower() == 'False'  # 启用有头模式，实时预览
     
     # 超时配置（优化后）
     IMPLICIT_WAIT = 5  # 隐式等待（秒）
