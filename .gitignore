@@ -4,9 +4,10 @@ __pycache__/
 *$py.class
 *.so
 .Python
+*.egg-info/
+dist/
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -16,14 +17,6 @@ parts/
 sdist/
 var/
 wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual Environment
-venv/
-ENV/
-env/
 .venv
 
 # IDE
@@ -41,3 +34,4 @@ output.json
 # Temporary Files
 *.tmp
 *.bak
+archive/

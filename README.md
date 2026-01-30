@@ -106,10 +106,20 @@ python run_tests.py file test_cases/test_login_csv_driven.py  # 运行指定文�
 - ⚡ 轻量级（约83KB）
 
 ### 3. Allure 报告（专业推荐）
-**位置**: `reports/allure-results/`  
-**查看方式**: 
+**位置**: `reports/allure-results/` (原始数据) 和 `reports/allure-html/` (生成的HTML报告)
+
+**查看方式**:
+
+> ⚠️ **重要**: Allure 报告不能直接用浏览器打开 `file://` 协议的 HTML 文件,会因为跨域限制导致 404 错误或一直显示 "Loading..."。必须使用以下命令之一:
+
+**方法 1: 打开已生成的 HTML 报告**(启动本地服务器)
 ```bash
-allure serve reports/allure-results/
+allure open reports/allure-html
+```
+
+**方法 2: 直接从测试结果生成并打开**(推荐)
+```bash
+allure serve reports/allure-results
 ```
 
 **特点**:
