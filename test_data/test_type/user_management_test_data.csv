@@ -1,0 +1,4 @@
+account,nickname,phone,gender,password,confirm_password,avatar_path,expected_result,description
+testuser001,测试用户001,13800138000,男,Test@123456,Test@123456,,success,新建普通用户
+testuser002,测试用户002,13800138001,女,Test@123456,Test@123456,D:\我的文件夹\图片\2.jpg,success,新建女性用户(含头像)
+testuser003,测试用户003,13800138002,男,Pass123,Pass123,D:\我的文件夹\图片\1.jpg,success,不同路径头像

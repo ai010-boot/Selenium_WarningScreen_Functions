@@ -1,0 +1,4 @@
+device_name,device_code,installation_position,remarks,expected_result,description
+测试设备001,DEV001,测试位置001,备注001,success,新建设备001
+测试设备002,DEV002,测试位置002,备注002,success,新建设备002
+测试设备003,DEV003,测试位置003,,success,新建设备003（无备注）
